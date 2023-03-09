@@ -1,14 +1,19 @@
 package ru.funnydwarf.iot.ml.sensor.reader;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.funnydwarf.iot.ml.I2CAddress;
-import ru.funnydwarf.iot.ml.sensor.MeasurementData;
+import ru.funnydwarf.iot.ml.sensor.CurrentMeasurementSession;
+import ru.funnydwarf.iot.ml.sensor.Measurement;
+import ru.funnydwarf.iot.ml.sensor.MeasurementDescription;
+import ru.funnydwarf.iot.ml.sensor.MeasurementDescriptionRepository;
+import ru.funnydwarf.iot.ml.utils.I2CDriverWorker;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Реализация читателя показаний датчика AHT10.
@@ -16,38 +21,20 @@ import java.util.Date;
  * МОМЕНТ! На форумах вычитал что этот датчик плохо работает вместе с другими устройствами на шине
  * Так же данный датчик требует инициализации перед использованием
  */
-@Component
+@Slf4j
 public class AHT10Reader implements Reader {
-
-    private static final Logger log = LoggerFactory.getLogger(AHT10Reader.class);
-
-    @Value("${Modules.Sensors.AHT10.temperatureUnitName:°C}")
-    private String temperatureUnitName;
-
-    @Value("${Modules.Sensors.DS18B20.temperatureMeasurementName:Temperature}")
-    private String temperatureMeasurementName;
-
-    @Value("${Modules.Sensors.AHT10.airHumidityUnitName:%}")
-    private String airHumidityUnitName;
-
-    @Value("${Modules.Sensors.DS18B20.airHumidityMeasurementName:Air Humidity}")
-    private String airHumidityMeasurementName;
-
+    private static final String commandRegister = "0xAC";
+    private static final String dataRegister = "0x00";
+    private static final List<String> measurementTriggerCommand = List.of("0x33", "0x00");
     @Override
-    public MeasurementData[] read(Object address) {
+    public double[] read(Object address, Object... args) {
         log.debug("read() called with: address = [{}]", address);
-        I2CAddress i2CAddress = (I2CAddress) address;
-        ProcessBuilder doMeasurementProcessBuilder = new ProcessBuilder("i2cset", "-y",
-                String.valueOf(i2CAddress.bus()), i2CAddress.deviceAddress(), "0xAC", "0x33", "0x00", "i");
-        ProcessBuilder getResultProcessBuilder = new ProcessBuilder("i2cget", "-y",
-                String.valueOf(i2CAddress.bus()), i2CAddress.deviceAddress(), "0x00", "i");
-        String result = null;
+        I2CAddress i2cAddress = (I2CAddress) address;
 
+        String result = null;
         try {
-            doMeasurementProcessBuilder.start().waitFor();
-            Process getResult = getResultProcessBuilder.start();
-            getResult.waitFor();
-            result = new String(getResult.getInputStream().readAllBytes());
+            I2CDriverWorker.writeBlockData(i2cAddress, commandRegister, measurementTriggerCommand);
+            result = I2CDriverWorker.readBlockData(i2cAddress, dataRegister);
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
@@ -65,18 +52,9 @@ public class AHT10Reader implements Reader {
         rowHumidity >>= 4;
         double humidity = rowHumidity * 100 / 1048576.0;
 
-        return new MeasurementData[] {
-                MeasurementData.createToCurrentDate(temperature, temperatureUnitName, temperatureMeasurementName),
-                MeasurementData.createToCurrentDate(humidity, airHumidityUnitName, airHumidityMeasurementName)
-        };
-    }
-
-    @Override
-    public MeasurementData[] getTemplateRead() {
-        Date incorrectDate = new Date(1);
-        return new MeasurementData[]{
-                new MeasurementData(Double.MIN_VALUE, temperatureUnitName, temperatureMeasurementName, incorrectDate),
-                new MeasurementData(Double.MIN_VALUE, airHumidityUnitName, airHumidityMeasurementName, incorrectDate),
+        return new double[]{
+                temperature,
+                humidity
         };
     }
 }

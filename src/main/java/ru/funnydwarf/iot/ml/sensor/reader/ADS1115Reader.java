@@ -1,65 +1,54 @@
 package ru.funnydwarf.iot.ml.sensor.reader;
 
-import ru.funnydwarf.iot.ml.sensor.MeasurementData;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.funnydwarf.iot.ml.I2CAddress;
+import ru.funnydwarf.iot.ml.sensor.Measurement;
+import ru.funnydwarf.iot.ml.utils.I2CDriverWorker;
+import ru.funnydwarf.iot.ml.utils.ads1115.*;
 
-import java.util.ArrayList;
-import java.util.Date;
+import java.io.IOException;
+import java.util.HexFormat;
 import java.util.List;
 
+@Slf4j
 public class ADS1115Reader implements Reader {
 
-    public record MUXAndMeasurementTemplatePair(int MUX, MeasurementData template) {
-    }
+    private final ADS1115Config config;
 
-    private final List<MUXAndMeasurementTemplatePair> configData;
-
-    public ADS1115Reader(List<MUXAndMeasurementTemplatePair> configData) {
-        this.configData = configData;
+    public ADS1115Reader(ADS1115Config config) {
+        this.config = config;
     }
 
     @Override
-    public MeasurementData[] read(Object address) {
-        MeasurementData[] measurementData = new MeasurementData[configData.size()];
-        for (int i = 0; i < measurementData.length; i++) {
-            MUXAndMeasurementTemplatePair pair = configData.get(i);
-            // TODO: 01.11.2022
+    public double[] read(Object address, Object ... args) {
+        log.debug("read() called with: address = [{}]", address);
+        I2CAddress i2cAddress = (I2CAddress) address;
+
+        if (config.getMode() == ADS1115Mode.SINGLE && config.getState() != ADS1115State.READ_DONE_WRITE_START) {
+            config.setState(ADS1115State.READ_DONE_WRITE_START);
         }
-        return new MeasurementData[0];
+
+        String rowValue;
+        try {
+            I2CDriverWorker.writeBlockData(i2cAddress, ADS1115Registers.CONFIG_REGISTER, config.getConfigBytePair());
+            boolean flag = true;
+            while (flag){
+                String rowResults = I2CDriverWorker.readBlockData(i2cAddress, ADS1115Registers.CONFIG_REGISTER);
+                List<String> resultBytes = List.of(rowResults.split(" "));
+                flag = !resultBytes.equals(config.getConfigBytePair());
+            }
+            rowValue = I2CDriverWorker.readBlockData(i2cAddress, ADS1115Registers.CONVERSION_REGISTER);
+        } catch (IOException | InterruptedException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+
+        byte[] resultBytes = HexFormat.of().withDelimiter(" ").withPrefix("0x").parseHex(rowValue);
+        short resultShort = 0;
+        resultShort |= ((resultBytes[0] << 8) | resultBytes[1]);
+        double result = 100 * (resultShort < 0 ? resultShort / (double) Math.abs(Short.MIN_VALUE) : resultShort / (double) Short.MAX_VALUE);
+        return new double[] { result };
     }
-
-    @Override
-    public MeasurementData[] getTemplateRead() {
-        MeasurementData[] measurementData = new MeasurementData[configData.size()];
-        for (int i = 0; i < measurementData.length; i++) {
-            MUXAndMeasurementTemplatePair pair = configData.get(i);
-            measurementData[i] = new MeasurementData(Double.MIN_VALUE, pair.template.unitName(),
-                    pair.template.measurementName(), new Date(1));
-        }
-        return measurementData;
-    }
-
-    public static class ADS1115ReaderBuilder {
-
-        int MUX_A0_A1 = 0b000;
-        int MUX_A0_A3 = 0b001;
-        int MUX_A1_A3 = 0b010;
-        int MUX_A2_A3 = 0b011;
-        int MUX_A0_GND = 0b100;
-        int MUX_A1_GND = 0b101;
-        int MUX_A2_GND = 0b110;
-        int MUX_A3_GND = 0b111;
-
-        private List<MUXAndMeasurementTemplatePair> configData = new ArrayList<>();
-
-        public ADS1115ReaderBuilder forMUX(int MUX, String unitName, String measurementNames) {
-            configData.add(new MUXAndMeasurementTemplatePair(MUX,
-                    new MeasurementData(Double.MIN_VALUE, unitName, measurementNames, new Date(1))));
-            return this;
-        }
-
-        public ADS1115Reader build() {
-            return new ADS1115Reader(configData);
-        }
-    }
-
 }
