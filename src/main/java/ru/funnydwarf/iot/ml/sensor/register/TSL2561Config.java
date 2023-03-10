@@ -9,7 +9,6 @@ import ru.funnydwarf.iot.ml.utils.I2CDriverWorker;
 import java.io.IOException;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 public class TSL2561Config {
 
