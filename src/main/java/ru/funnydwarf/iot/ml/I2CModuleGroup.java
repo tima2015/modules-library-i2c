@@ -1,6 +1,9 @@
 package ru.funnydwarf.iot.ml;
 
 
+import lombok.Getter;
+
+@Getter
 public class I2CModuleGroup extends ModuleGroup {
 
     private final String bus;
