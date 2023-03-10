@@ -37,11 +37,18 @@ public class I2CMeasurementDataConfiguration {
         return new MeasurementDescription[] {temperature, airHumidity};
     }
 
+    @Bean("TSL2561IlluminanceMeasurementDescription")
+    @Lazy
+    @Autowired
+    public MeasurementDescription getTSL2561IlluminanceMeasurementDescription(MeasurementDescriptionRepository mdr) {
+        return MeasurementDescriptionRepository.findOrCreate(mdr, "lx", "Illuminance", "TSL2561 Illuminance");
+    }
+
     @Bean("TSL2561MeasurementDescription")
     @Lazy
     @Autowired
-    public MeasurementDescription getTSL2561MeasurementDescription(MeasurementDescriptionRepository mdr) {
-        return MeasurementDescriptionRepository.findOrCreate(mdr, "lx", "Illuminance", "TSL2561 Illuminance");
+    public MeasurementDescription[] getTSL2561MeasurementDescription(@Qualifier("TSL2561IlluminanceMeasurementDescription") MeasurementDescription illuminance) {
+        return new MeasurementDescription[]{ illuminance };
     }
 
 }
