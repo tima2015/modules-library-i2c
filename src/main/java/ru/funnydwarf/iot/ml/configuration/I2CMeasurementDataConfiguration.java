@@ -11,7 +11,6 @@ import ru.funnydwarf.iot.ml.sensor.MeasurementDescription;
 import ru.funnydwarf.iot.ml.sensor.MeasurementDescriptionRepository;
 
 @Configuration
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class I2CMeasurementDataConfiguration {
 
     @Bean("AHT10TemperatureMeasurementDescription")

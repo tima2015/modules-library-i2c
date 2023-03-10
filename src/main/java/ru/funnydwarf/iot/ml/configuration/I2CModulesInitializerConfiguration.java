@@ -14,7 +14,6 @@ import ru.funnydwarf.iot.ml.utils.I2CDriverWorker;
 import java.util.List;
 
 @Configuration
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class I2CModulesInitializerConfiguration {
 
