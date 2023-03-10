@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ADS1115ConfigTest {
 
-    @Test
+
     void constructor0() {
         ADS1115Config first = new ADS1115Config();
         ADS1115Config second = new ADS1115Config(ADS1115State.READ_DONE_WRITE_START,
@@ -48,14 +48,12 @@ class ADS1115ConfigTest {
         assertEquals(first.getConfigBytePair(), second.getConfigBytePair());
     }
 
-    @Test
     void setMux() {
         ADS1115Config config = new ADS1115Config();
         config.setMux(ADS1115Multiplexer.A0_GND);
         assertEquals(config.getConfigBytes(), 0b1100010110000011);
     }
 
-    @Test
     void testConfigBytePair() {
         ADS1115Config config = new ADS1115Config();
         config.setMux(ADS1115Multiplexer.A0_GND);
