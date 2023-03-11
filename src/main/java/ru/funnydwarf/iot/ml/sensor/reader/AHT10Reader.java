@@ -41,14 +41,14 @@ public class AHT10Reader implements Reader {
         }
 
         String[] bytesString = result.split(" ");
-        int rowTemperature = (Byte.parseByte(bytesString[3],16) & 0x0F) << 16;
-        rowTemperature |= Byte.parseByte(bytesString[4],16) << 8;
-        rowTemperature |= Byte.parseByte(bytesString[5],16);
+        int rowTemperature = (Integer.parseUnsignedInt(bytesString[3],16) & 0x0F) << 16;
+        rowTemperature |= Integer.parseUnsignedInt(bytesString[4],16) << 8;
+        rowTemperature |= Integer.parseUnsignedInt(bytesString[5],16);
         double temperature = rowTemperature * 200 / 1048576.0 - 50;
 
-        int rowHumidity = Byte.parseByte(bytesString[1],16) << 16;
-        rowHumidity |= Byte.parseByte(bytesString[2],16) << 8;
-        rowHumidity |= Byte.parseByte(bytesString[3],16);
+        int rowHumidity = Integer.parseUnsignedInt(bytesString[1],16) << 16;
+        rowHumidity |= Integer.parseUnsignedInt(bytesString[2],16) << 8;
+        rowHumidity |= Integer.parseUnsignedInt(bytesString[3],16);
         rowHumidity >>= 4;
         double humidity = rowHumidity * 100 / 1048576.0;
 
