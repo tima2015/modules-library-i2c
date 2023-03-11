@@ -60,7 +60,7 @@ public class TSL2561Config {
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = Short.parseShort(I2CDriverWorker.readByte(address, getHexAddress()));
+            short value = Short.parseShort(I2CDriverWorker.readByte(address, getHexAddress()), 16);
             setGain(ValuePart.getFromBits(value, Gain.inBits, Gain.gains));
             setManual(ValuePart.getFromBits(value, Manual.inBits, Manual.manuals));
             setIntegrate(ValuePart.getFromBits(value, Integrate.inBits, Integrate.integrates));
@@ -138,14 +138,14 @@ public class TSL2561Config {
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = Short.parseShort(I2CDriverWorker.readByte(address, getHexAddress()));
+            short value = Short.parseShort(I2CDriverWorker.readByte(address, getHexAddress()), 16);
             setPower(ValuePart.getFromBits(value, Power.inBits, Power.powers));
             assertValue(value);
         }
 
         @Override
         public void writeCurrentRegisterValueToDevice(I2CAddress address) throws IOException, InterruptedException {
-
+            // TODO: 11.03.2023
         }
 
         public static final class Power extends ValuePart {
@@ -193,7 +193,7 @@ public class TSL2561Config {
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = Short.parseShort(I2CDriverWorker.readByte(address, getHexAddress()));
+            short value = Short.parseShort(I2CDriverWorker.readByte(address, getHexAddress()),16);
             setPartNumber(ValuePart.getFromBits(value, PartNumber.inBits, PartNumber.partNumbers));
             setRevisionNumber((short) (value & 0b0000000000001111));
             assertValue(value);
@@ -235,7 +235,7 @@ public class TSL2561Config {
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = Short.parseShort(I2CDriverWorker.readByte(address, getHexAddress()));
+            short value = Short.parseShort(I2CDriverWorker.readByte(address, getHexAddress()), 16);
             setData(value);
             assertValue(value);
         }
