@@ -34,7 +34,7 @@ public class AHT10Reader implements Reader {
         String result = null;
         try {
             I2CDriverWorker.writeBlockData(i2cAddress, commandRegister, measurementTriggerCommand);
-            result = I2CDriverWorker.readBlockData(i2cAddress, dataRegister);
+            result = I2CDriverWorker.readBlockData(i2cAddress, dataRegister).replace("0x", "");
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
