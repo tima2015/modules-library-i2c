@@ -3,10 +3,8 @@ package ru.funnydwarf.iot.ml.utils;
 import ru.funnydwarf.iot.ml.I2CAddress;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.io.InputStream;
+import java.util.*;
 
 public class I2CDriverWorker {
 
@@ -29,14 +27,14 @@ public class I2CDriverWorker {
         command.add(bus);
         Process process = new ProcessBuilder(command).start();
         process.waitFor();
-        return new String(process.getInputStream().readAllBytes());
+        return readStringFromInputStream(process.getInputStream());
     }
 
     public static String readDeviceDump(I2CAddress address) throws IOException, InterruptedException {
         List<String> command = appendAddressToCommand(i2cdumpRowCommand, address);
         Process process = new ProcessBuilder(command).start();
         process.waitFor();
-        return new String(process.getInputStream().readAllBytes());
+        return readStringFromInputStream(process.getInputStream());
     }
 
     public static String readByte(I2CAddress address, String register) throws InterruptedException, IOException {
@@ -44,7 +42,7 @@ public class I2CDriverWorker {
         command.add(register);
         Process process = new ProcessBuilder(command).start();
         process.waitFor();
-        return new String(process.getInputStream().readAllBytes());
+        return readStringFromInputStream(process.getInputStream());
     }
 
     public static void writeByte(I2CAddress address, String register, String value) throws InterruptedException, IOException {
@@ -60,7 +58,7 @@ public class I2CDriverWorker {
         command.add("i");
         Process process = new ProcessBuilder(command).start();
         process.waitFor();
-        return new String(process.getInputStream().readAllBytes());
+        return readStringFromInputStream(process.getInputStream());
     }
     public static void writeBlockData(I2CAddress address, String register, List<String> values) throws IOException, InterruptedException {
         List<String> command = appendAddressToCommand(i2csetRowCommand, address);
@@ -68,6 +66,13 @@ public class I2CDriverWorker {
         command.addAll(values);
         command.add("i");
         new ProcessBuilder(command).start().waitFor();
+    }
+
+    private static String readStringFromInputStream(InputStream inputStream) {
+        Scanner s = new Scanner(inputStream).useDelimiter("\\A");
+        String result = s.hasNext() ? s.next() : "";
+        s.close();
+        return result;
     }
 
 }
