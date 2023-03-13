@@ -47,7 +47,7 @@ public class I2CModuleGroup extends ModuleGroup implements ModuleListReadable {
                 if (address.equals("--") || address.equals("  ")){
                     continue;
                 }
-                addresses.add(new I2CAddress(bus, "%h%h".formatted(row_i - 1, column_i), Sensor.class));
+                addresses.add(new I2CAddress(bus, "%h%h".formatted(row_i - 1, column_i / 3), Sensor.class));
             }
         }
         return addresses;
