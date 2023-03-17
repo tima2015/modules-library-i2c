@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import ru.funnydwarf.iot.ml.I2CAddress;
 import ru.funnydwarf.iot.ml.InitializationState;
 import ru.funnydwarf.iot.ml.Module;
@@ -17,10 +18,12 @@ import java.util.List;
 @Slf4j
 public class I2CModulesInitializerConfiguration {
 
-    @Bean("AHT10Initializer")
+    @Slf4j
+    @Component
     @Lazy
-    public Module.Initializer getAHT10Initializer() {
-        return module -> {
+    public static class AHT10Initializer implements Module.Initializer {
+        @Override
+        public InitializationState initialize(Module module) {
             I2CAddress address = (I2CAddress) module.getAddress();
             try {
                 if (!I2CDriverWorker.readDetectedDevices(address.bus()).contains(address.deviceAddress())) {
@@ -34,7 +37,7 @@ public class I2CModulesInitializerConfiguration {
                 return InitializationState.INITIALIZATION_ERROR;
             }
             return InitializationState.OK;
-        };
+        }
     }
 
 }
