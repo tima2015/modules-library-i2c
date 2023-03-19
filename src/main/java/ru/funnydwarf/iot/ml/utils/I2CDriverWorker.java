@@ -78,7 +78,7 @@ public class I2CDriverWorker {
         Scanner s = new Scanner(inputStream).useDelimiter("\\A");
         String result = s.hasNext() ? s.next() : "";
         s.close();
-        return result.replace("0x", "");
+        return result.replace("0x", "").replace("\n", "");
     }
 
 }
