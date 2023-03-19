@@ -42,7 +42,7 @@ public class I2CDriverWorker {
         command.add(register);
         Process process = new ProcessBuilder(command).start();
         process.waitFor();
-        String str = readStringFromInputStream(process.getInputStream()).replace("0x", "").replace("\\s", "");
+        String str = readStringFromInputStream(process.getInputStream()).replace("0x", "").replace("\n", "");
         return Integer.parseUnsignedInt(str,16);
     }
 
