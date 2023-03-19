@@ -1,15 +1,15 @@
 package ru.funnydwarf.iot.ml.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.funnydwarf.iot.ml.I2CAddress;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class I2CDriverWorker {
-
-    private I2CDriverWorker(){}
-
     private static final List<String> i2csetRowCommand = List.of("i2cset", "-y");
     private static final List<String> i2cgetRowCommand = List.of("i2cget", "-y");
     private static final List<String> i2cdetectRowCommand = List.of("i2cdetect", "-y");
