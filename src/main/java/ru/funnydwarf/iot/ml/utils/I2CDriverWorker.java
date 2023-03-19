@@ -37,12 +37,13 @@ public class I2CDriverWorker {
         return readStringFromInputStream(process.getInputStream());
     }
 
-    public static String readByte(I2CAddress address, String register) throws InterruptedException, IOException {
+    public static int readByte(I2CAddress address, String register) throws InterruptedException, IOException {
         List<String> command = appendAddressToCommand(i2cgetRowCommand, address);
         command.add(register);
         Process process = new ProcessBuilder(command).start();
         process.waitFor();
-        return readStringFromInputStream(process.getInputStream());
+        String str = readStringFromInputStream(process.getInputStream());
+        return Integer.parseUnsignedInt(str,16);
     }
 
     public static void writeByte(I2CAddress address, String register, String value) throws InterruptedException, IOException {
@@ -52,13 +53,18 @@ public class I2CDriverWorker {
         new ProcessBuilder(command).start().waitFor();
     }
 
-    public static String readBlockData(I2CAddress address, String register) throws InterruptedException, IOException {
+    public static int[] readBlockData(I2CAddress address, String register) throws InterruptedException, IOException {
         List<String> command = appendAddressToCommand(i2cgetRowCommand, address);
         command.add(register);
         command.add("i");
         Process process = new ProcessBuilder(command).start();
         process.waitFor();
-        return readStringFromInputStream(process.getInputStream());
+        String[] str = readStringFromInputStream(process.getInputStream()).split(" ");
+        int[] out = new int[str.length];
+        for (int i = 0; i < str.length; i++) {
+            out[i] = Integer.parseUnsignedInt(str[i], 16);
+        }
+        return out;
     }
     public static void writeBlockData(I2CAddress address, String register, List<String> values) throws IOException, InterruptedException {
         List<String> command = appendAddressToCommand(i2csetRowCommand, address);
@@ -72,7 +78,7 @@ public class I2CDriverWorker {
         Scanner s = new Scanner(inputStream).useDelimiter("\\A");
         String result = s.hasNext() ? s.next() : "";
         s.close();
-        return result;
+        return result.replace("0x", "");
     }
 
 }

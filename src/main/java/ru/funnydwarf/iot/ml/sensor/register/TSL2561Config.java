@@ -60,7 +60,7 @@ public class TSL2561Config {
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = (short) Integer.parseUnsignedInt(I2CDriverWorker.readByte(address, getHexAddress()), 16);
+            short value = (short) I2CDriverWorker.readByte(address, getHexAddress());
             setGain(ValuePart.getFromBits(value, Gain.inBits, Gain.gains));
             setManual(ValuePart.getFromBits(value, Manual.inBits, Manual.manuals));
             setIntegrate(ValuePart.getFromBits(value, Integrate.inBits, Integrate.integrates));
@@ -138,7 +138,7 @@ public class TSL2561Config {
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = (short) Integer.parseUnsignedInt(I2CDriverWorker.readByte(address, getHexAddress()), 16);
+            short value = (short) I2CDriverWorker.readByte(address, getHexAddress());
             setPower(ValuePart.getFromBits(value, Power.inBits, Power.powers));
             assertValue(value);
         }
@@ -193,7 +193,7 @@ public class TSL2561Config {
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = (short) Integer.parseUnsignedInt(I2CDriverWorker.readByte(address, getHexAddress()),16);
+            short value = (short) I2CDriverWorker.readByte(address, getHexAddress());
             setPartNumber(ValuePart.getFromBits(value, PartNumber.inBits, PartNumber.partNumbers));
             setRevisionNumber((short) (value & 0b0000000000001111));
             assertValue(value);
@@ -235,7 +235,7 @@ public class TSL2561Config {
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = (short) Integer.parseUnsignedInt(I2CDriverWorker.readByte(address, getHexAddress()), 16);
+            short value = (short) I2CDriverWorker.readByte(address, getHexAddress());
             setData(value);
             assertValue(value);
         }

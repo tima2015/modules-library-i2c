@@ -31,26 +31,27 @@ public class AHT10Reader implements Reader {
         log.debug("read() called with: address = [{}]", address);
         I2CAddress i2cAddress = (I2CAddress) address;
 
-        String result = null;
+        int[] bytes;
         try {
             I2CDriverWorker.writeBlockData(i2cAddress, commandRegister, measurementTriggerCommand);
-            result = I2CDriverWorker.readBlockData(i2cAddress, dataRegister).replace("0x", "");
+            bytes = I2CDriverWorker.readBlockData(i2cAddress, dataRegister);
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
 
-        String[] bytesString = result.split(" ");
-        int rowTemperature = (Integer.parseUnsignedInt(bytesString[3],16) & 0x0F) << 16;
-        rowTemperature |= Integer.parseUnsignedInt(bytesString[4],16) << 8;
-        rowTemperature |= Integer.parseUnsignedInt(bytesString[5],16);
-        double temperature = rowTemperature * 200 / 1048576.0 - 50;
+        int rowTemperature = (bytes[3] & 0x0F) << 8;
+        rowTemperature |= bytes[4];
+        rowTemperature <<= 8;
+        rowTemperature |= bytes[5];
+        double temperature = ((double)rowTemperature) * 200 / 1048576.0 - 50;
 
-        int rowHumidity = Integer.parseUnsignedInt(bytesString[1],16) << 16;
-        rowHumidity |= Integer.parseUnsignedInt(bytesString[2],16) << 8;
-        rowHumidity |= Integer.parseUnsignedInt(bytesString[3],16);
-        rowHumidity >>= 4;
-        double humidity = rowHumidity * 100 / 1048576.0;
+        int rowHumidity = bytes[1];
+        rowHumidity <<= 8;
+        rowHumidity |= bytes[2];
+        rowHumidity <<= 4;
+        rowHumidity |= bytes[3] >> 4;
+        double humidity = ((double) rowHumidity) * 100 / 1048576.0;
 
         return new double[]{
                 temperature,

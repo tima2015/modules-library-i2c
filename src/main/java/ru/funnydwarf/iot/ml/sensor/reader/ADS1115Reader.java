@@ -13,6 +13,7 @@ import java.util.HexFormat;
 import java.util.List;
 
 @Slf4j
+@Deprecated // FIXME: 19.03.2023 нужно переделать конфиг
 public class ADS1115Reader implements Reader {
 
     private final ADS1115Config config;
@@ -23,7 +24,7 @@ public class ADS1115Reader implements Reader {
 
     @Override
     public double[] read(Object address, Object ... args) {
-        log.debug("read() called with: address = [{}]", address);
+        /*log.debug("read() called with: address = [{}]", address);
         I2CAddress i2cAddress = (I2CAddress) address;
 
         if (config.getMode() == ADS1115Mode.SINGLE && config.getState() != ADS1115State.READ_DONE_WRITE_START) {
@@ -49,6 +50,7 @@ public class ADS1115Reader implements Reader {
         short resultShort = 0;
         resultShort |= ((resultBytes[0] << 8) | resultBytes[1]);
         double result = 100 * (resultShort < 0 ? resultShort / (double) Math.abs(Short.MIN_VALUE) : resultShort / (double) Short.MAX_VALUE);
-        return new double[] { result };
+        return new double[] { result };*/
+        return new double[0];
     }
 }
