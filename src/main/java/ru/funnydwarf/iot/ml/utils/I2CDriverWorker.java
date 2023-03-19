@@ -42,7 +42,7 @@ public class I2CDriverWorker {
         command.add(register);
         Process process = new ProcessBuilder(command).start();
         process.waitFor();
-        String str = readStringFromInputStream(process.getInputStream()).replace("0x", "").replace("\n", "");
+        String str = readStringFromInputStream(process.getInputStream()).replace("0x", "").replace("\\s", "");
         return Integer.parseUnsignedInt(str,16);
     }
 
@@ -59,7 +59,7 @@ public class I2CDriverWorker {
         command.add("i");
         Process process = new ProcessBuilder(command).start();
         process.waitFor();
-        String[] str = readStringFromInputStream(process.getInputStream()).replace("0x", "").replace("\n", "").split(" ");
+        String[] str = readStringFromInputStream(process.getInputStream()).replace("0x", "").split("\\s");
         int[] out = new int[str.length];
         for (int i = 0; i < str.length; i++) {
             out[i] = Integer.parseUnsignedInt(str[i], 16);
