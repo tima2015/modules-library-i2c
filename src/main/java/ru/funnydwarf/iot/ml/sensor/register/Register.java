@@ -17,13 +17,13 @@ public class Register {
         BYTE, WORD
     }
 
-    private final short address;
+    private final int address;
     private final String hexAddress;
     private final Size size;
-    private short value = 0;
+    private int value = 0;
     private List<String> hexValues;
 
-    public Register(short address, Size size) {
+    public Register(int address, Size size) {
         this.address = address;
         this.size = size;
         hexAddress = "0x%h".formatted(address);
@@ -37,7 +37,7 @@ public class Register {
         hexValues = size == Size.BYTE ? List.of(hexBytes[1]) : List.of(hexBytes);
     }
 
-    protected final void setValue(short value) {
+    protected final void setValue(int value) {
         this.value = value;
         updateConfigBytePair();
     }
@@ -46,7 +46,7 @@ public class Register {
 
     }
 
-    protected final void assertValue(short value) {
+    protected final void assertValue(int value) {
         if (value != this.value) {
             throw new RuntimeException("Control register value check fail! Row value = [" + Integer.toBinaryString(value) + "], after parse register value = [" + Integer.toBinaryString(this.value) + "]!");
         }
@@ -55,9 +55,9 @@ public class Register {
     @AllArgsConstructor
     @Getter
     public static class ValuePart {
-        protected final short bits;
+        protected final int bits;
 
-        protected static <T extends ValuePart> T getFromBits(short value, short forBits, T[] valueParts) {
+        protected static <T extends ValuePart> T getFromBits(int value, int forBits, T[] valueParts) {
             for (T part : valueParts) {
                 if (((value & forBits) ^ part.bits) == 0) {
                     return part;
