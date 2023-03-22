@@ -26,16 +26,14 @@ public class Register {
     public Register(short address, Size size) {
         this.address = address;
         this.size = size;
-        hexAddress = HexFormat.of().withUpperCase().withDelimiter(" ").withPrefix("0x").formatHex(new byte[]{
-                (byte) (address & 0xff)
-        }).split(" ")[0];
+        hexAddress = "0x%h".formatted(address);
     }
 
     private void updateConfigBytePair() {
-        String[] hexBytes = HexFormat.of().withUpperCase().withDelimiter(" ").withPrefix("0x").formatHex(new byte[]{
-                (byte) ((value >> 8) & 0xff),
-                (byte) (value & 0xff)
-        }).split(" ");
+        String[] hexBytes = new String[] {
+                "0x%h".formatted((value >> 8) & 0xff),
+                "0x%h".formatted(value & 0xff)
+        };
         hexValues = size == Size.BYTE ? List.of(hexBytes[1]) : List.of(hexBytes);
     }
 
