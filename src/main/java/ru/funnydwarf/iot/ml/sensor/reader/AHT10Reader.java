@@ -16,7 +16,7 @@ import java.io.IOException;
 public class AHT10Reader implements Reader {
     private static final int commandRegister = 0xAC;
     private static final int dataRegister = 0x00;
-    private static final int measurementTriggerCommand = 0x3300;
+    private static final int[] measurementTriggerCommand = {0x33, 0x00};
     private static final int dataBlockBytesCount = 6;
     @Override
     public double[] read(Object address, Object... args) {
@@ -25,7 +25,8 @@ public class AHT10Reader implements Reader {
 
         int[] bytes;
         try {
-            I2CDriverWorker.writeWord(i2cAddress, commandRegister, measurementTriggerCommand);
+            I2CDriverWorker.writeBlock(i2cAddress, commandRegister, measurementTriggerCommand);
+            Thread.sleep(1000);// FIXME: 24.03.2023 написать класс конфигурации регистров, проверять с его помощью состояние замера
             bytes = I2CDriverWorker.readBlock(i2cAddress, dataRegister, dataBlockBytesCount);
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
