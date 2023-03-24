@@ -27,6 +27,7 @@ public class AHT10Reader implements Reader {
         try {
             I2CDriverWorker.writeBlock(i2cAddress, commandRegister, measurementTriggerCommand);
             Thread.sleep(1000);// FIXME: 24.03.2023 написать класс конфигурации регистров, проверять с его помощью состояние замера
+
             bytes = I2CDriverWorker.readBlock(i2cAddress, dataRegister, dataBlockBytesCount);
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
