@@ -96,7 +96,7 @@ public class I2CDriverWorker {
     }
 
     public static void writeBlock(I2CAddress address, int register, int[] value) throws IOException, InterruptedException {
-        write(address, register, value, List.of(blockArg, String.valueOf(value.length)));
+        write(address, register, value, List.of(blockArg));
     }
 
     private static String readStringFromInputStream(InputStream inputStream) {
