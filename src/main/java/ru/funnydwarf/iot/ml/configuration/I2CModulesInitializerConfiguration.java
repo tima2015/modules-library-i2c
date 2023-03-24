@@ -26,9 +26,9 @@ public class I2CModulesInitializerConfiguration {
         public InitializationState initialize(Module module) {
             I2CAddress address = (I2CAddress) module.getAddress();
             try {
-                String init_register = "0xE1";
-                List<String> initializeCommand = List.of("0x08", "0x00");
-                I2CDriverWorker.writeBlockData(address, init_register, initializeCommand);
+                int init_register = 0xE1;
+                int initializeCommand = 0x0800;
+                I2CDriverWorker.writeWord(address, init_register, initializeCommand);
             } catch (Exception e) {
                 log.warn(e.getMessage(), e);
                 return InitializationState.INITIALIZATION_ERROR;

@@ -1,13 +1,8 @@
 package ru.funnydwarf.iot.ml.sensor.register;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import ru.funnydwarf.iot.ml.utils.ads1115.ADS1115Multiplexer;
 
-import java.lang.annotation.Retention;
-import java.util.HexFormat;
 import java.util.List;
 
 @Getter

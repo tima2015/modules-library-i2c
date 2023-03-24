@@ -1,19 +1,10 @@
 package ru.funnydwarf.iot.ml.sensor.reader;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import ru.funnydwarf.iot.ml.I2CAddress;
-import ru.funnydwarf.iot.ml.sensor.CurrentMeasurementSession;
-import ru.funnydwarf.iot.ml.sensor.Measurement;
-import ru.funnydwarf.iot.ml.sensor.MeasurementDescription;
-import ru.funnydwarf.iot.ml.sensor.MeasurementDescriptionRepository;
 import ru.funnydwarf.iot.ml.utils.I2CDriverWorker;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Реализация читателя показаний датчика AHT10.
@@ -23,9 +14,10 @@ import java.util.List;
  */
 @Slf4j
 public class AHT10Reader implements Reader {
-    private static final String commandRegister = "0xAC";
-    private static final String dataRegister = "0x00";
-    private static final List<String> measurementTriggerCommand = List.of("0x33", "0x00");
+    private static final int commandRegister = 0xAC;
+    private static final int dataRegister = 0x00;
+    private static final int measurementTriggerCommand = 0x3300;
+    private static final int dataBlockBytesCount = 6;
     @Override
     public double[] read(Object address, Object... args) {
         log.debug("read() called with: address = [{}]", address);
@@ -33,8 +25,8 @@ public class AHT10Reader implements Reader {
 
         int[] bytes;
         try {
-            I2CDriverWorker.writeBlockData(i2cAddress, commandRegister, measurementTriggerCommand);
-            bytes = I2CDriverWorker.readBlockData(i2cAddress, dataRegister);
+            I2CDriverWorker.writeWord(i2cAddress, commandRegister, measurementTriggerCommand);
+            bytes = I2CDriverWorker.readBlock(i2cAddress, dataRegister, dataBlockBytesCount);
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);

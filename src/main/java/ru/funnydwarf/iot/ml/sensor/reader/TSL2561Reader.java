@@ -7,6 +7,7 @@ import ru.funnydwarf.iot.ml.I2CAddress;
 import ru.funnydwarf.iot.ml.sensor.register.TSL2561Config;
 
 import java.io.IOException;
+import java.util.Date;
 
 @Slf4j
 public class TSL2561Reader implements Reader {
@@ -20,12 +21,18 @@ public class TSL2561Reader implements Reader {
     @Getter
     private boolean useCSPackage = true; //Chip-scale package else T, FN and CL package
 
+    @Setter
+    @Getter
+    private boolean continuously = true;
+
+    private Date lastMeasurement = new Date(1);
+
     public TSL2561Reader(TSL2561Config config) {
         this.config = config;
     }
 
-    private short getTwoByteValue(TSL2561Config.DataRegister high, TSL2561Config.DataRegister low) {
-        short value = high.getValue();
+    private int getTwoByteValue(TSL2561Config.DataRegister high, TSL2561Config.DataRegister low) {
+        int value = high.getValue();
         value <<= 8;
         value |= low.getValue();
         return value;
@@ -101,28 +108,83 @@ public class TSL2561Reader implements Reader {
         return scale;
     }
 
+    private void enableIfNeed(I2CAddress address) {
+        TSL2561Config.ControlRegister control = config.getControlRegister();
+        TSL2561Config.TimingRegister.Integrate integrate = config.getTimingRegister().getIntegrate();
+        try {
+            if (control.getPower().equals(TSL2561Config.ControlRegister.Power.POWER_DOWN)) {
+                control.setPower(TSL2561Config.ControlRegister.Power.POWER_UP);
+                control.writeCurrentRegisterValueToDevice(address);
+                lastMeasurement = new Date();
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void disableIfNeed(I2CAddress address) {
+        try {
+            if (!continuously) {
+                config.getControlRegister().setPower(TSL2561Config.ControlRegister.Power.POWER_DOWN);
+                config.getControlRegister().writeCurrentRegisterValueToDevice(address);
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void manualReadRegisterDataIfNeed(I2CAddress address) {
+        try {
+            TSL2561Config.TimingRegister timingRegister = config.getTimingRegister();
+            timingRegister.readRegisterValueFromDevice(address);
+            if (timingRegister.getIntegrate().equals(TSL2561Config.TimingRegister.Integrate.NA)) {
+                timingRegister.setManual(TSL2561Config.TimingRegister.Manual.START);
+                timingRegister.writeCurrentRegisterValueToDevice(address);
+                Thread.sleep(manualTiming);
+                timingRegister.setManual(TSL2561Config.TimingRegister.Manual.STOP);
+                timingRegister.writeCurrentRegisterValueToDevice(address);
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void waitUntilMeasurementComplete() {
+        long deltaTime = new Date().getTime() - lastMeasurement.getTime();
+        int measurementTime = config.getTimingRegister().getIntegrate().getMilliseconds();
+        if (measurementTime > deltaTime) {
+            try {
+                Thread.sleep(measurementTime - deltaTime);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void readRegisterData(I2CAddress address) {
+        try {
+            config.getData0LowRegister().readRegisterValueFromDevice(address);
+            config.getData0HighRegister().readRegisterValueFromDevice(address);
+            config.getData1LowRegister().readRegisterValueFromDevice(address);
+            config.getData1HighRegister().readRegisterValueFromDevice(address);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public double[] read(Object address, Object... args) {
         log.debug("read() called with: address = [{}]", address);
         I2CAddress i2cAddress = (I2CAddress) address;
-        TSL2561Config.TimingRegister timingRegister = config.getTimingRegister();
-        try {
-            timingRegister.readRegisterValueFromDevice(i2cAddress);
-            if (timingRegister.getIntegrate().equals(TSL2561Config.TimingRegister.Integrate.NA)) {
-                timingRegister.setManual(TSL2561Config.TimingRegister.Manual.START);
-                Thread.sleep(manualTiming);
-                timingRegister.setManual(TSL2561Config.TimingRegister.Manual.STOP);
-            }
-            config.getData0LowRegister().readRegisterValueFromDevice(i2cAddress);
-            config.getData0HighRegister().readRegisterValueFromDevice(i2cAddress);
-            config.getData1LowRegister().readRegisterValueFromDevice(i2cAddress);
-            config.getData1HighRegister().readRegisterValueFromDevice(i2cAddress);
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
 
-        short ch0 = getTwoByteValue(config.getData0HighRegister(), config.getData0LowRegister());
-        short ch1 = getTwoByteValue(config.getData1HighRegister(), config.getData1LowRegister());
+        enableIfNeed(i2cAddress);
+        manualReadRegisterDataIfNeed(i2cAddress);
+        waitUntilMeasurementComplete();
+        readRegisterData(i2cAddress);
+        disableIfNeed(i2cAddress);
+
+        int ch0 = getTwoByteValue(config.getData0HighRegister(), config.getData0LowRegister());
+        int ch1 = getTwoByteValue(config.getData1HighRegister(), config.getData1LowRegister());
         long scale = selectScale(config.getTimingRegister().getIntegrate(), config.getTimingRegister().getGain());
 
         long channel0 = (scale * ch0) >> CH_SCALE;
@@ -196,6 +258,6 @@ public class TSL2561Reader implements Reader {
         long temp = Math.max(channel0 - channel1, 0);
         temp += (1 << (LUX_SCALE - 1));
         long lux = temp >> LUX_SCALE;
-        return new double[] {lux};
+        return new double[]{lux};
     }
 }

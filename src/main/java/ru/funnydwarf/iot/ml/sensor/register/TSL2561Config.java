@@ -1,6 +1,5 @@
 package ru.funnydwarf.iot.ml.sensor.register;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ru.funnydwarf.iot.ml.I2CAddress;
@@ -12,13 +11,18 @@ import java.io.IOException;
 @NoArgsConstructor
 public class TSL2561Config {
 
+    private static final int COMMAND_BIT = 0b10000000;
+    private static final int CLEAR_BIT = 0b01000000;
+    private static final int WORD_BIT = 0b00100000;
+    private static final int BLOCK_BIT = 0b00010000;
+
     private final ControlRegister controlRegister = new ControlRegister();
     private final TimingRegister timingRegister = new TimingRegister();
     private final IDRegister idRegister = new IDRegister();
-    private final DataRegister data0LowRegister = new DataRegister((short) 0x0C);
-    private final DataRegister data0HighRegister = new DataRegister((short) 0x0D);
-    private final DataRegister data1LowRegister = new DataRegister((short) 0x0E);
-    private final DataRegister data1HighRegister = new DataRegister((short) 0x0F);
+    private final DataRegister data0LowRegister = new DataRegister(0x0C);
+    private final DataRegister data0HighRegister = new DataRegister(0x0D);
+    private final DataRegister data1LowRegister = new DataRegister(0x0E);
+    private final DataRegister data1HighRegister = new DataRegister(0x0F);
 
 
     @Getter
@@ -29,14 +33,14 @@ public class TSL2561Config {
         private Integrate integrate = Integrate.CYCLE_402_MS;
 
         private TimingRegister() {
-            super((short) 0x1, Size.BYTE);
-            setValue((short) 0b1111111100011011);
+            super(0x1, Size.BYTE);
+            setValue(0b0001_1011);
         }
 
         @Override
         protected void updateValueByValueParts() {
             super.updateValueByValueParts();
-            short newValue = 0;
+            int newValue = 0;
             newValue |= gain.getBits();
             newValue |= manual.getBits();
             newValue |= integrate.getBits();
@@ -60,7 +64,7 @@ public class TSL2561Config {
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = (short) I2CDriverWorker.readByte(address, getHexAddress());
+            int value = I2CDriverWorker.readByte(address, COMMAND_BIT | getAddress());
             setGain(ValuePart.getFromBits(value, Gain.inBits, Gain.gains));
             setManual(ValuePart.getFromBits(value, Manual.inBits, Manual.manuals));
             setIntegrate(ValuePart.getFromBits(value, Integrate.inBits, Integrate.integrates));
@@ -69,47 +73,47 @@ public class TSL2561Config {
 
         @Override
         public void writeCurrentRegisterValueToDevice(I2CAddress address) throws IOException, InterruptedException {
-            I2CDriverWorker.writeByte(address, getHexAddress(), getHexValues().get(0));
+            I2CDriverWorker.writeByte(address,COMMAND_BIT | getAddress(), getValue());
         }
 
         public static final class Gain extends ValuePart {
 
             private Gain(int bits) {
-                super((short) bits);
+                super(bits);
             }
 
-            public static final Gain LOW = new Gain(0b0000000000000000);
-            public static final Gain HIGH = new Gain(0b0000000000010000);
-
-            private static final short inBits = 0b0000000000010000;
+            public static final Gain LOW = new Gain(0b0000_0000);
+            public static final Gain HIGH = new Gain(0b0001_0000);
+            private static final int inBits = 0b0001_0000;
             private static final Gain[] gains = new Gain[] { LOW, HIGH };
         }
 
         public static final class Manual extends ValuePart {
 
             private Manual(int bits) {
-                super((short) bits);
+                super(bits);
             }
 
-            public static final Manual START = new Manual(0b0000000000001000);
-            public static final Manual STOP = new Manual(0b0000000000000000);
-
-            private static final short inBits = 0b0000000000001000;
+            public static final Manual START = new Manual(0b0000_1000);
+            public static final Manual STOP = new Manual(0b0000_0000);
+            private static final int inBits = 0b0000_1000;
             private static final Manual[] manuals = new Manual[] {START, STOP};
         }
 
+        @Getter
         public static final class Integrate extends ValuePart {
 
-            private Integrate(int bits) {
-                super((short) bits);
+            private int milliseconds;
+            private Integrate(int bits, int milliseconds) {
+                super(bits);
+                this.milliseconds = milliseconds;
             }
 
-            public static final Integrate CYCLE_13_7_MS = new Integrate(0b0000000000000000);
-            public static final Integrate CYCLE_101_MS = new Integrate(0b0000000000000001);
-            public static final Integrate CYCLE_402_MS = new Integrate(0b0000000000000010);
-            public static final Integrate NA = new Integrate(0b0000000000000011);
-
-            private static final short inBits = 0b0000000000000011;
+            public static final Integrate CYCLE_13_7_MS = new Integrate(0b0000_0000, 14);
+            public static final Integrate CYCLE_101_MS = new Integrate(0b0000_0001, 101);
+            public static final Integrate CYCLE_402_MS = new Integrate(0b0000_0010, 402);
+            public static final Integrate NA = new Integrate(0b0000_0011, 0);
+            private static final int inBits = 0b0000_0011;
             private static final Integrate[] integrates = new Integrate[] { CYCLE_13_7_MS, CYCLE_101_MS, CYCLE_402_MS, NA};
         }
     }
@@ -119,14 +123,14 @@ public class TSL2561Config {
 
         private Power power;
         public ControlRegister() {
-            super((short) 0x0, Size.BYTE);
-            setValue((short) 0b1111111100000000);
+            super(0x0, Size.BYTE);
+            setValue(0b0000_0000);
         }
 
         @Override
         protected void updateValueByValueParts() {
             super.updateValueByValueParts();
-            short newValue = 0;
+            int newValue = 0;
             newValue |= power.getBits();
             setValue(newValue);
         }
@@ -138,25 +142,25 @@ public class TSL2561Config {
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = (short) I2CDriverWorker.readByte(address, getHexAddress());
+            int value = I2CDriverWorker.readByte(address, COMMAND_BIT | getAddress());
             setPower(ValuePart.getFromBits(value, Power.inBits, Power.powers));
             assertValue(value);
         }
 
         @Override
         public void writeCurrentRegisterValueToDevice(I2CAddress address) throws IOException, InterruptedException {
-            // TODO: 11.03.2023
+            I2CDriverWorker.writeByte(address, COMMAND_BIT | getAddress(), getValue());
         }
 
         public static final class Power extends ValuePart {
             private Power(int bits) {
-                super((short) bits);
+                super(bits);
             }
 
-            public static final Power POWER_DOWN = new Power(0b0000000000000000);
-            public static final Power POWER_UP = new Power(0b0000000000000011);
+            public static final Power POWER_DOWN = new Power(0b0000_0000);
+            public static final Power POWER_UP = new Power(0b0000_0011);
 
-            private static final short inBits = 0b0000000000000011;
+            private static final int inBits = 0b0000_0011;
             private static final Power[] powers = new Power[] { POWER_DOWN, POWER_UP };
         }
     }
@@ -167,15 +171,15 @@ public class TSL2561Config {
     public static final class IDRegister extends Register implements Readable {
 
         private PartNumber partNumber = PartNumber.UNKNOWN;
-        private short revisionNumber = 0b0000000000000000;
+        private int revisionNumber = 0b0000_0000;
         private IDRegister() {
-            super((short) 0x0A, Size.BYTE);
+            super(0x0A, Size.BYTE);
         }
 
         @Override
         protected void updateValueByValueParts() {
             super.updateValueByValueParts();
-            short newValue = 0;
+            int newValue = 0;
             newValue |= partNumber.bits;
             newValue |= revisionNumber;
             setValue(newValue);
@@ -186,29 +190,28 @@ public class TSL2561Config {
             updateValueByValueParts();
         }
 
-        public void setRevisionNumber(short revisionNumber) {
+        public void setRevisionNumber(int revisionNumber) {
             this.revisionNumber = revisionNumber;
             updateValueByValueParts();
         }
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = (short) I2CDriverWorker.readByte(address, getHexAddress());
+            int value = I2CDriverWorker.readByte(address, getAddress());
             setPartNumber(ValuePart.getFromBits(value, PartNumber.inBits, PartNumber.partNumbers));
-            setRevisionNumber((short) (value & 0b0000000000001111));
+            setRevisionNumber(value & 0b0000_1111);
             assertValue(value);
         }
 
         public static final class PartNumber extends ValuePart {
             private PartNumber(int bits) {
-                super((short) bits);
+                super(bits);
             }
 
-            public static final PartNumber UNKNOWN = new PartNumber(0b0000000011110000);
-            public static final PartNumber TSL2560 = new PartNumber(0b0000000000000000);
-            public static final PartNumber TSL2561 = new PartNumber(0b0000000000010000);
-
-            private static final short inBits = 0b0000000011110000;
+            public static final PartNumber UNKNOWN = new PartNumber(0b1111_0000);
+            public static final PartNumber TSL2560 = new PartNumber(0b0000_0000);
+            public static final PartNumber TSL2561 = new PartNumber(0b0001_0000);
+            private static final int inBits = 0b1111_0000;
             private static final PartNumber[] partNumbers = new PartNumber[] {UNKNOWN, TSL2560, TSL2561};
         }
     }
@@ -216,9 +219,9 @@ public class TSL2561Config {
     @Getter
     public static final class DataRegister extends Register implements Readable {
 
-        private short data = 0b0000000000000000;
+        private int data = 0b0000_0000;
 
-        private DataRegister(short address) {
+        private DataRegister(int address) {
             super(address, Size.BYTE);
         }
 
@@ -228,14 +231,14 @@ public class TSL2561Config {
             setValue(data);
         }
 
-        public void setData(short data) {
+        public void setData(int data) {
             this.data = data;
             updateValueByValueParts();
         }
 
         @Override
         public void readRegisterValueFromDevice(I2CAddress address) throws IOException, InterruptedException {
-            short value = (short) I2CDriverWorker.readByte(address, getHexAddress());
+            int value = I2CDriverWorker.readByte(address, COMMAND_BIT | WORD_BIT | getAddress());
             setData(value);
             assertValue(value);
         }
