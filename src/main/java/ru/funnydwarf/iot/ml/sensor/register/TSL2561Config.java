@@ -121,7 +121,7 @@ public class TSL2561Config {
     @Getter
     public static final class ControlRegister extends Register implements Writeable, Readable {
 
-        private Power power;
+        private Power power = Power.POWER_DOWN;
         public ControlRegister() {
             super(0x0, Size.BYTE);
             setValue(0b0000_0000);
