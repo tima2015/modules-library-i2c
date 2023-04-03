@@ -21,14 +21,13 @@ public class AHT10Reader implements Reader<I2CAddress> {
     @Override
     public double[] read(I2CAddress address, Object... args) {
         log.debug("read() called with: address = [{}]", address);
-        I2CAddress i2cAddress = (I2CAddress) address;
 
         int[] bytes;
         try {
-            I2CDriverWorker.writeBlock(i2cAddress, commandRegister, measurementTriggerCommand);
+            I2CDriverWorker.writeBlock(address, commandRegister, measurementTriggerCommand);
             Thread.sleep(1000);// FIXME: 24.03.2023 написать класс конфигурации регистров, проверять с его помощью состояние замера
 
-            bytes = I2CDriverWorker.readBlock(i2cAddress, dataRegister, dataBlockBytesCount);
+            bytes = I2CDriverWorker.readBlock(address, dataRegister, dataBlockBytesCount);
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
