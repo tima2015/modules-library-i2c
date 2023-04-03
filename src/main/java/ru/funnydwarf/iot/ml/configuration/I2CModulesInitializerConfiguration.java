@@ -1,18 +1,14 @@
 package ru.funnydwarf.iot.ml.configuration;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.funnydwarf.iot.ml.I2CAddress;
+import ru.funnydwarf.iot.ml.I2CModuleGroup;
 import ru.funnydwarf.iot.ml.InitializationState;
 import ru.funnydwarf.iot.ml.Module;
 import ru.funnydwarf.iot.ml.utils.I2CDriverWorker;
-
-import java.util.List;
 
 @Configuration
 @Slf4j

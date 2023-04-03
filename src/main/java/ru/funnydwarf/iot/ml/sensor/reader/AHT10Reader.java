@@ -13,13 +13,13 @@ import java.io.IOException;
  * Так же данный датчик требует инициализации перед использованием
  */
 @Slf4j
-public class AHT10Reader implements Reader {
+public class AHT10Reader implements Reader<I2CAddress> {
     private static final int commandRegister = 0xAC;
     private static final int dataRegister = 0x00;
     private static final int[] measurementTriggerCommand = {0x33, 0x00};
     private static final int dataBlockBytesCount = 6;
     @Override
-    public double[] read(Object address, Object... args) {
+    public double[] read(I2CAddress address, Object... args) {
         log.debug("read() called with: address = [{}]", address);
         I2CAddress i2cAddress = (I2CAddress) address;
 

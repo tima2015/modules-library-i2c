@@ -14,7 +14,7 @@ import java.util.List;
 
 @Slf4j
 @Deprecated // FIXME: 19.03.2023 нужно переделать конфиг
-public class ADS1115Reader implements Reader {
+public class ADS1115Reader implements Reader<I2CAddress> {
 
     private final ADS1115Config config;
 
@@ -23,7 +23,7 @@ public class ADS1115Reader implements Reader {
     }
 
     @Override
-    public double[] read(Object address, Object ... args) {
+    public double[] read(I2CAddress address, Object ... args) {
         /*log.debug("read() called with: address = [{}]", address);
         I2CAddress i2cAddress = (I2CAddress) address;
 

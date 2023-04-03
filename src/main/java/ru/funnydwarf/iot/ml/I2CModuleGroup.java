@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class I2CModuleGroup extends ModuleGroup implements ModuleListReadable {
+public class I2CModuleGroup extends ModuleGroup implements ModuleListReadable<I2CAddress> {
 
     private final String bus;
 
@@ -31,8 +31,8 @@ public class I2CModuleGroup extends ModuleGroup implements ModuleListReadable {
     }
 
     @Override
-    public List<Object> readModuleAdressesList() {
-        List<Object> addresses = new ArrayList<>();
+    public List<I2CAddress> readModuleAdressesList() {
+        List<I2CAddress> addresses = new ArrayList<>();
         String devicesTable = null;
         try {
             devicesTable = I2CDriverWorker.readDetectedDevices(bus);

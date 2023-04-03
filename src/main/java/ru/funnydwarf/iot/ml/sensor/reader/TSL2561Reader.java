@@ -4,13 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import ru.funnydwarf.iot.ml.I2CAddress;
-import ru.funnydwarf.iot.ml.sensor.register.TSL2561Config;
+import ru.funnydwarf.iot.ml.register.TSL2561Config;
 
 import java.io.IOException;
 import java.util.Date;
 
 @Slf4j
-public class TSL2561Reader implements Reader {
+public class TSL2561Reader implements Reader<I2CAddress> {
 
     TSL2561Config config;
 
@@ -173,15 +173,14 @@ public class TSL2561Reader implements Reader {
     }
 
     @Override
-    public double[] read(Object address, Object... args) {
+    public double[] read(I2CAddress address, Object... args) {
         log.debug("read() called with: address = [{}]", address);
-        I2CAddress i2cAddress = (I2CAddress) address;
 
-        enableIfNeed(i2cAddress);
-        manualReadRegisterDataIfNeed(i2cAddress);
+        enableIfNeed(address);
+        manualReadRegisterDataIfNeed(address);
         waitUntilMeasurementComplete();
-        readRegisterData(i2cAddress);
-        disableIfNeed(i2cAddress);
+        readRegisterData(address);
+        disableIfNeed(address);
 
         int ch0 = getTwoByteValue(config.getData0HighRegister(), config.getData0LowRegister());
         int ch1 = getTwoByteValue(config.getData1HighRegister(), config.getData1LowRegister());

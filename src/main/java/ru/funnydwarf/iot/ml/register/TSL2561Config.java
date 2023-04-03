@@ -1,4 +1,4 @@
-package ru.funnydwarf.iot.ml.sensor.register;
+package ru.funnydwarf.iot.ml.register;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,7 +26,7 @@ public class TSL2561Config {
 
 
     @Getter
-    public static final class TimingRegister extends Register implements Writeable, Readable {
+    public static final class TimingRegister extends Register implements Writeable<I2CAddress>, Readable<I2CAddress> {
 
         private Gain gain = Gain.LOW;
         private Manual manual = Manual.START;
@@ -119,7 +119,7 @@ public class TSL2561Config {
     }
 
     @Getter
-    public static final class ControlRegister extends Register implements Writeable, Readable {
+    public static final class ControlRegister extends Register implements Writeable<I2CAddress>, Readable<I2CAddress> {
 
         private Power power = Power.POWER_DOWN;
         public ControlRegister() {
@@ -168,7 +168,7 @@ public class TSL2561Config {
     // TODO: 09.03.2023 Interrupt Threshold Register & Interrupt Control Register
 
     @Getter
-    public static final class IDRegister extends Register implements Readable {
+    public static final class IDRegister extends Register implements Readable<I2CAddress> {
 
         private PartNumber partNumber = PartNumber.UNKNOWN;
         private int revisionNumber = 0b0000_0000;
@@ -217,7 +217,7 @@ public class TSL2561Config {
     }
 
     @Getter
-    public static final class DataRegister extends Register implements Readable {
+    public static final class DataRegister extends Register implements Readable<I2CAddress> {
 
         private int data = 0b0000_0000;
 
