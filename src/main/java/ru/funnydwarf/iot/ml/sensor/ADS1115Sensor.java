@@ -7,7 +7,7 @@ import ru.funnydwarf.iot.ml.sensor.reader.ADS1115Reader;
 import ru.funnydwarf.iot.ml.utils.I2CDriverWorker;
 
 @Deprecated
-public class ADS1115Sensor extends Sensor{
+public class ADS1115Sensor extends Sensor<I2CModuleGroup, I2CAddress>{
     public ADS1115Sensor(MeasurementDescriptionRepository mdr, CurrentMeasurementSession cms, ADS1115Reader reader, I2CModuleGroup group, I2CAddress address, String name, String description) {
         super(reader, new MeasurementDescription[]{
                 mdr.findByUnitNameAndNameAndDescription("%", "value", "value from %s".formatted(name))
@@ -22,8 +22,7 @@ public class ADS1115Sensor extends Sensor{
 
     @Override
     protected InitializationState initialize() throws Exception {
-        I2CAddress address = (I2CAddress) getAddress();
-        if (!I2CDriverWorker.readDetectedDevices(address.bus()).contains(address.deviceAddress())) {
+        if (!I2CDriverWorker.readDetectedDevices(getAddress().bus()).contains(getAddress().deviceAddress())) {
             return InitializationState.INITIALIZATION_ERROR;
         }
         return super.initialize();
