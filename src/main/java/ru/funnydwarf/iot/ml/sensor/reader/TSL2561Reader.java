@@ -189,6 +189,9 @@ public class TSL2561Reader implements Reader<I2CAddress> {
         long channel0 = (scale * ch0) >> CH_SCALE;
         long channel1 = (scale * ch1) >> CH_SCALE;
 
+        double rowBroadband = channel0;//Инфракрасное + видимое
+        double rowIR = channel1;//Инфракрасное
+
         long ratio = 0;
         if (channel0 != 0) {
             ratio = (channel1 << (RATIO_SCALE + 1)) / channel0;
@@ -257,6 +260,6 @@ public class TSL2561Reader implements Reader<I2CAddress> {
         long temp = Math.max(channel0 - channel1, 0);
         temp += (1 << (LUX_SCALE - 1));
         long lux = temp >> LUX_SCALE;
-        return new double[]{lux};
+        return new double[]{ rowBroadband, rowIR, lux };
     }
 }

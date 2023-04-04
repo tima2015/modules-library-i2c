@@ -36,6 +36,20 @@ public class I2CMeasurementDataConfiguration {
         return new MeasurementDescription[] {temperature, airHumidity};
     }
 
+    @Bean("TSL2561RowBroadbandMeasurementDescription")
+    @Lazy
+    @Autowired
+    public MeasurementDescription getTSL2561RowBroadbandMeasurementDescription(MeasurementDescriptionRepository mdr) {
+        return MeasurementDescriptionRepository.findOrCreate(mdr, "λ", "Wavelength", "TSL2561 Row broadband");
+    }
+
+    @Bean("TSL2561RowIRMeasurementDescription")
+    @Lazy
+    @Autowired
+    public MeasurementDescription getTSL2561RowIRMeasurementDescription(MeasurementDescriptionRepository mdr) {
+        return MeasurementDescriptionRepository.findOrCreate(mdr, "λ", "Wavelength", "TSL2561 Row infrared radiation");
+    }
+
     @Bean("TSL2561IlluminanceMeasurementDescription")
     @Lazy
     @Autowired
@@ -46,8 +60,10 @@ public class I2CMeasurementDataConfiguration {
     @Bean("TSL2561MeasurementDescription")
     @Lazy
     @Autowired
-    public MeasurementDescription[] getTSL2561MeasurementDescription(@Qualifier("TSL2561IlluminanceMeasurementDescription") MeasurementDescription illuminance) {
-        return new MeasurementDescription[]{ illuminance };
+    public MeasurementDescription[] getTSL2561MeasurementDescription(@Qualifier("TSL2561RowBroadbandMeasurementDescription") MeasurementDescription broadband,
+                                                                     @Qualifier("TSL2561RowIRMeasurementDescription") MeasurementDescription ir,
+                                                                     @Qualifier("TSL2561IlluminanceMeasurementDescription") MeasurementDescription illuminance) {
+        return new MeasurementDescription[]{ broadband, ir, illuminance };
     }
 
 }
