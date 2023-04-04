@@ -189,8 +189,8 @@ public class TSL2561Reader implements Reader<I2CAddress> {
         long channel0 = (scale * ch0) >> CH_SCALE;
         long channel1 = (scale * ch1) >> CH_SCALE;
 
-        double rowBroadband = channel0;//Инфракрасное + видимое
-        double rowIR = channel1;//Инфракрасное
+        double rowBroadband = channel0;// инфракрасное + видимое
+        double rowIR = channel1;// инфракрасное
 
         long ratio = 0;
         if (channel0 != 0) {
