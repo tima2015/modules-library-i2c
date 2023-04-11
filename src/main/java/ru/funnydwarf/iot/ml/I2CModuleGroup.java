@@ -2,7 +2,6 @@ package ru.funnydwarf.iot.ml;
 
 
 import lombok.Getter;
-import ru.funnydwarf.iot.ml.sensor.Sensor;
 import ru.funnydwarf.iot.ml.utils.I2CDriverWorker;
 
 import java.io.IOException;
@@ -33,7 +32,7 @@ public class I2CModuleGroup extends ModuleGroup implements ModuleListReadable<I2
     @Override
     public List<I2CAddress> readModuleAdressesList() {
         List<I2CAddress> addresses = new ArrayList<>();
-        String devicesTable = null;
+        String devicesTable;
         try {
             devicesTable = I2CDriverWorker.readDetectedDevices(bus);
         } catch (InterruptedException | IOException e) {

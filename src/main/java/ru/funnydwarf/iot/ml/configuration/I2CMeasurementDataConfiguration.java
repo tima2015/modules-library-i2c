@@ -1,7 +1,5 @@
 package ru.funnydwarf.iot.ml.configuration;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +15,7 @@ public class I2CMeasurementDataConfiguration {
     @Lazy
     @Autowired
     public MeasurementDescription getAHT10TemperatureMeasurementDescription(MeasurementDescriptionRepository mdr) {
-        return MeasurementDescriptionRepository.findOrCreate(mdr, "°C", "Temperature", "AHT10 temperature");
+        return MeasurementDescriptionRepository.findOrCreate(mdr, "°C", "Temperature", "AHT10 air temperature");
     }
 
     @Bean("AHT10AirHumidityMeasurementDescription")

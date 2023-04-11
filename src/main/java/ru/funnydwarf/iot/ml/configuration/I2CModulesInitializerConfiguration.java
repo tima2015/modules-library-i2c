@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import ru.funnydwarf.iot.ml.I2CAddress;
-import ru.funnydwarf.iot.ml.I2CModuleGroup;
 import ru.funnydwarf.iot.ml.InitializationState;
 import ru.funnydwarf.iot.ml.Module;
 import ru.funnydwarf.iot.ml.utils.I2CDriverWorker;

@@ -1,16 +1,8 @@
 package ru.funnydwarf.iot.ml.sensor.reader;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.funnydwarf.iot.ml.I2CAddress;
-import ru.funnydwarf.iot.ml.sensor.Measurement;
-import ru.funnydwarf.iot.ml.utils.I2CDriverWorker;
 import ru.funnydwarf.iot.ml.utils.ads1115.*;
-
-import java.io.IOException;
-import java.util.HexFormat;
-import java.util.List;
 
 @Slf4j
 @Deprecated // FIXME: 19.03.2023 нужно переделать конфиг

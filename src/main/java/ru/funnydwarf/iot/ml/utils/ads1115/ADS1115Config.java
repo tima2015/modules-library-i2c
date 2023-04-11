@@ -2,7 +2,6 @@ package ru.funnydwarf.iot.ml.utils.ads1115;
 
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
