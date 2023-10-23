@@ -9,7 +9,7 @@ import java.io.IOException;
 
 @Getter
 @NoArgsConstructor
-public class TSL2561Config {
+public class TSL2561Config implements Config {
 
     private static final int COMMAND_BIT = 0b10000000;
     private static final int CLEAR_BIT = 0b01000000;
